@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) & !(IE 8)]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width" name="viewport"/>
+<title>R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기 | LOPES</title>
+<link href="https://gmpg.org/xfn/11" rel="profile"/>
+<link href="http://www.philosopher.co.kr/xmlrpc.php" rel="pingback"/>
+<!--[if lt IE 9]>
+<script src="http://www.philosopher.co.kr/wp-content/themes/twentytwelve/js/html5.js?ver=3.7.0" type="text/javascript"></script>
+<![endif]-->
+<script type="text/javascript">
+		var ajaxurl = 'http://www.philosopher.co.kr/wp-admin/admin-ajax.php';
+		</script>
+<link href="http://s0.wp.com/" rel="dns-prefetch"/>
+<link href="http://s.gravatar.com/" rel="dns-prefetch"/>
+<link href="http://s.w.org/" rel="dns-prefetch"/>
+<link href="../../../feed" rel="alternate" title="LOPES » Feed" type="application/rss+xml"/>
+<link href="../../../comments/feed" rel="alternate" title="LOPES » Comments Feed" type="application/rss+xml"/>
+<link href="418/feed" rel="alternate" title="LOPES » R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기 Comments Feed" type="application/rss+xml"/>
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2\/svg\/","svgExt":".svg","source":{"concatemoji":"http:\/\/www.philosopher.co.kr\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.29"}};
+			!function(e,o,t){var a,n,r;function i(e){var t=o.createElement("script");t.src=e,t.type="text/javascript",o.getElementsByTagName("head")[0].appendChild(t)}for(r=Array("simple","flag","unicode8","diversity","unicode9"),t.supports={everything:!0,everythingExceptFlag:!0},n=0;n<r.length;n++)t.supports[r[n]]=function(e){var t,a,n=o.createElement("canvas"),r=n.getContext&&n.getContext("2d"),i=String.fromCharCode;if(!r||!r.fillText)return!1;switch(r.textBaseline="top",r.font="600 32px Arial",e){case"flag":return(r.fillText(i(55356,56806,55356,56826),0,0),n.toDataURL().length<3e3)?!1:(r.clearRect(0,0,n.width,n.height),r.fillText(i(55356,57331,65039,8205,55356,57096),0,0),a=n.toDataURL(),r.clearRect(0,0,n.width,n.height),r.fillText(i(55356,57331,55356,57096),0,0),a!==n.toDataURL());case"diversity":return r.fillText(i(55356,57221),0,0),a=(t=r.getImageData(16,16,1,1).data)[0]+","+t[1]+","+t[2]+","+t[3],r.fillText(i(55356,57221,55356,57343),0,0),a!=(t=r.getImageData(16,16,1,1).data)[0]+","+t[1]+","+t[2]+","+t[3];case"simple":return r.fillText(i(55357,56835),0,0),0!==r.getImageData(16,16,1,1).data[0];case"unicode8":return r.fillText(i(55356,57135),0,0),0!==r.getImageData(16,16,1,1).data[0];case"unicode9":return r.fillText(i(55358,56631),0,0),0!==r.getImageData(16,16,1,1).data[0]}return!1}(r[n]),t.supports.everything=t.supports.everything&&t.supports[r[n]],"flag"!==r[n]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[r[n]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(a=function(){t.readyCallback()},o.addEventListener?(o.addEventListener("DOMContentLoaded",a,!1),e.addEventListener("load",a,!1)):(e.attachEvent("onload",a),o.attachEvent("onreadystatechange",function(){"complete"===o.readyState&&t.readyCallback()})),(a=t.source||{}).concatemoji?i(a.concatemoji):a.wpemoji&&a.twemoji&&(i(a.twemoji),i(a.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link href="../../../wp-content/themes/twentytwelve/fonts/font-open-sans.css%3Fver=20230328.css" id="twentytwelve-fonts-css" media="all" rel="stylesheet" type="text/css"/>
+<link href="../../../wp-content/themes/twentytwelve/style.css%3Fver=20230328.css" id="twentytwelve-style-css" media="all" rel="stylesheet" type="text/css"/>
+<link href="../../../wp-content/themes/twentytwelve/css/blocks.css%3Fver=20230213.css" id="twentytwelve-block-style-css" media="all" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 9]>
+<link rel='stylesheet' id='twentytwelve-ie-css'  href='http://www.philosopher.co.kr/wp-content/themes/twentytwelve/css/ie.css?ver=20150214' type='text/css' media='all' />
+<![endif]-->
+<link href="../../../wp-content/plugins/jetpack/_inc/social-logos/social-logos.min.css%3Fver=1.css" id="social-logos-css" media="all" rel="stylesheet" type="text/css"/>
+<link href="../../../wp-content/plugins/jetpack/css/jetpack.css%3Fver=4.5.3.css" id="jetpack_css-css" media="all" rel="stylesheet" type="text/css"/>
+<script src="../../../wp-includes/js/jquery/jquery.js%3Fver=1.12.4" type="text/javascript"></script>
+<script src="../../../wp-includes/js/jquery/jquery-migrate.min.js%3Fver=1.4.1" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var related_posts_js_options = {"post_heading":"h4"};
+/* ]]> */
+</script>
+<script src="../../../wp-content/plugins/jetpack/modules/related-posts/related-posts.js%3Fver=20150408" type="text/javascript"></script>
+<link href="../../../wp-json/index.html" rel="https://api.w.org/"/>
+<link href="../../../xmlrpc.php%3Frsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="../../../wp-includes/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="../04/414.html" rel="prev" title="#소피스트"/>
+<link href="../../06/01/429.html" rel="next" title="R에서 Gephi 없이 igraph을 이용하여 군집화 하기"/>
+<meta content="WordPress 4.6.29" name="generator"/>
+<link href="418.html" rel="canonical"/>
+<link href="http://wp.me/p7k2V0-6K" rel="shortlink"/>
+<link href="../../../wp-json/oembed/1.0/embed%3Furl=http:%252F%252Fwww.philosopher.co.kr%252F2016%252F04%252F13%252F418" rel="alternate" type="application/json+oembed"/>
+<link href="../../../wp-json/oembed/1.0/embed%3Furl=http:%252F%252Fwww.philosopher.co.kr%252F2016%252F04%252F13%252F418&amp;format=xml" rel="alternate" type="text/xml+oembed"/>
+<link href="http://v0.wordpress.com/" rel="dns-prefetch"/>
+<link href="http://i0.wp.com/" rel="dns-prefetch"/>
+<link href="http://i1.wp.com/" rel="dns-prefetch"/>
+<link href="http://i2.wp.com/" rel="dns-prefetch"/>
+<link href="http://jetpack.wordpress.com/" rel="dns-prefetch"/>
+<link href="http://s0.wp.com/" rel="dns-prefetch"/>
+<link href="http://s1.wp.com/" rel="dns-prefetch"/>
+<link href="http://s2.wp.com/" rel="dns-prefetch"/>
+<link href="http://public-api.wordpress.com/" rel="dns-prefetch"/>
+<link href="http://0.gravatar.com/" rel="dns-prefetch"/>
+<link href="http://1.gravatar.com/" rel="dns-prefetch"/>
+<link href="http://2.gravatar.com/" rel="dns-prefetch"/>
+<style type="text/css">img#wpstats{display:none}</style>
+<!-- Jetpack Open Graph Tags -->
+<meta content="article" property="og:type"/>
+<meta content="R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기" property="og:title"/>
+<meta content="http://www.philosopher.co.kr/2016/04/13/418" property="og:url"/>
+<meta content="안녕하세요~ LOPES의 배서연 입니다. 저번에 올린 글이 반응이 나쁘지 않아 용기 내어 올려 봅니다. LOPES 스터디 그룹에서도 각자 R을 이용하여 정리한 내용을 공유 차원에서 올릴 예정입니다. 어설프더라도 예쁘게 봐 주세요~^^ 이번에는 『DATA SMART』 3장에 나오는 나이브 베이즈(Naive Bayes)를 이용한 트윗 분류하기를 R로 구현…" property="og:description"/>
+<meta content="2016-04-13T07:28:35+00:00" property="article:published_time"/>
+<meta content="2016-06-15T06:05:59+00:00" property="article:modified_time"/>
+<meta content="LOPES" property="og:site_name"/>
+<meta content="https://s0.wp.com/i/blank.jpg" property="og:image"/>
+<meta content="en_US" property="og:locale"/>
+<meta content="summary" name="twitter:card"/>
+</head>
+<body class="single single-post postid-418 single-format-standard custom-font-enabled">
+<div class="hfeed site" id="page">
+<header class="site-header" id="masthead">
+<hgroup>
+<h1 class="site-title"><a href="../../../index.html" rel="home">LOPES</a></h1>
+<h2 class="site-description">외대 철학과 스터디 모임</h2>
+</hgroup>
+<nav class="main-navigation" id="site-navigation">
+<button class="menu-toggle">Menu</button>
+<a class="assistive-text" href="418.html#content">Skip to content</a>
+</nav><!-- #site-navigation -->
+</header><!-- #masthead -->
+<div class="wrapper" id="main">
+<div class="site-content" id="primary">
+<div id="content" role="main">
+<article class="post-418 post type-post status-publish format-standard hentry category-data-analysis tag-r" id="post-418">
+<header class="entry-header">
+<h1 class="entry-title">R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기</h1>
+<!-- .comments-link -->
+</header><!-- .entry-header -->
+<div class="entry-content">
+<p>안녕하세요~ LOPES의 배서연 입니다. 저번에 올린 글이 반응이 나쁘지 않아 용기 내어 올려 봅니다. LOPES 스터디 그룹에서도 각자 R을 이용하여 정리한 내용을 공유 차원에서 올릴 예정입니다. 어설프더라도 예쁘게 봐 주세요~^^</p>
+<p>이번에는 『DATA SMART』 3장에 나오는 나이브 베이즈(Naive Bayes)를 이용한 트윗 분류하기를 R로 구현해봤습니다. 저희 팀에서는 R로 구현하는 방법을 독자적으로 해결하고자 하다가 다음과 같은 곳을 발견하여 R로 쉽게 구현할 수 있었습니다. 나중에 나오는 설명과 코드 또한 아래 링크에서 많은 부분 빚졌음을 밝혀둡니다. 그리고 두 번째 링크는 동일한 내용을 다르게 해결하는 곳이 있어 추가합니다.</p>
+<p><a href="http://www.salemmarafi.com/code/twitter-naive-bayes/">Tweet Bayes Classification: Excel and R : Salem Marafi</a></p>
+<p><a href="http://workinganalytics.com/data-smart-ch3-classifying-tweets-using-naive-bayes/">Data Smart, Ch3, Classifying Tweets using Naive Bayes – Working Analytics</a></p>
+<p>R로 풀어볼 나이브 베이즈(Naïve Bayes) 모델은 소위 ‘지도 학습법(supervised learning)’에 속합니다. 주로 스팸 메일을 구분할 때 사용합니다. 스팸 메일에서 자주 등장하는 단어들의 확률 값을 통해 다른 메일이 스팸 메일인지 아닌지를 판단할 수 있는 방법입니다.</p>
+<p>『DATA SMART』 3장에서는 나이브 베이즈(Naïve Bayes) 모델을 이용해 트위터에서 맨드릴(Mandrill)이라는 단어가 언급되는 경우, 새로 출시한 앱(app)인 맨드릴<a href="http://www.Mandrill.com">Mandrill</a>에 대한 트윗인지 아니면 관련없는 것들을 언급하는 것인지 설명하고 있습니다. 진행 과정은 다음과 같습니다.</p>
+<p>새로 출시한 ‘맨드릴(Mandrill)’이라는 서비스를 이야기하는 트윗은 (App)이라고 표기하고 다른 것들은 이야기하는 트윗은 (Other)으로 표기하겠습니다. ‘맨드릴(Mandrill)’이라는 단어를 언급하는 트윗을 조사했더니, 예를 들어 그 트윗에는 단어1, 단어2, 단어3 등등으로 구성되었다고 생각해 봅시다. 이때 맨드릴 서비스를 이야기하고 있는 150개의 트윗들을 가지고 있는 문장 안의 단어들을 다 조사할 수 있습니다. 이때 각각의 맨드릴 서비스를 이야기하고 있는 각각의 트윗이 단어1, 단어2, 단어3 등등을 가지고 있는 확률과 다른 것을 이야기하고 있는 트윗이 단어 2, 단어 4, 단어 6 등등을 가질 확률은 다음과 같습니다.</p>
+<blockquote><p>
+  P(App | 단어 1, 단어 3, 단어 5, …)</p>
+<p>  P(Other | 단어 2, 단어 4, 단어 6, …)
+</p></blockquote>
+<p>이 확률 조건표를 가지고 후에 테스트할 트윗이 앱에 대해 이야기하는 것인지 아니면 다른 것을 이야기하고 있는지 확인할 수 있습니다. 테스트 할 트윗 단어들이 앱에 관련될 확률과 아니면 다른 것에 관련될 확률을 비교해 가장 확률이 높은 클래스로 분류시키는 것이 바로 최대 후험 규칙(MAP rule, Maxium A Posteriori rule)입니다. 이렇게 만들기 위해서는 베이즈 규칙을 적용하되 바보같이 각 단어들이 문맥과 상관없이 독립적인 사건이라고 가정하여 확률을 구합니다. 이를 나이브 베이즈 규칙이라고 합니다. 예를 들어 감기와 콧물이 문맥 상 전혀 관계없는 단어가 아니더라도 일단 둘 다 독립적인 사건으로 가정하면 다음과 같이 규칙을 쓸 수 있습니다.</p>
+<blockquote><p>
+  P(스팸메일|감기, 콧물 ) = P(감기|스팸메일) * P(콧물|스팸메일)
+</p></blockquote>
+<p>이를 활용하여 새로 테스트할 트윗의 각 단어들(단어1′, 단어2′, 단어3’…)이 앱에 관련된 것인지 아닌 지에 대해 비교할 확률은 다음과 같이 구할 수 있습니다. 이 두 개의 값 중 더 큰 값에 따라 클래스를 분류할 수 있습니다.</p>
+<blockquote><p>
+  P(App | 단어1′ , 단어2′, 단어3′ …)<br/>
+  = P(App) * (단어1’|App) * P(단어2’|App) * P(단어3’|App)…</p>
+<p>  P(Other |단어1′ , 단어2′, 단어3′ …)<br/>
+  =P(Other) * 단어1’|Other) * P(단어2’|Other) * P(단어3’|Other)…
+</p></blockquote>
+<p>재밌게도 나이브 베이즈 모델은 대충 부정확한 가정을 세워도 후에 어느 것이 더 큰 확률이냐를 비교하기 때문에 이상하지만 비교적 정확한 모델이라고 평가 받고 있습니다. 그럼 앞의 과정에 따라 R 로 예제 트윗을 분류해봅시다.</p>
+<h2>1) 첫 번째 단계: 데이터를 가져와 깨끗하게 정리하기</h2>
+<p>『DATA SMART』 3장에서는 엑셀로 작업하고 있지만, 우리는 R에서 작업을 하기 때문에 엑셀 파일에 들어 있는 자료를 CSV 형식 파일로 바꿔서 가져오겠습니다. 이 자료는 맨드릴(Mandrill) 앱(App)에 관련된 트윗과 관련되지 않은(Other) 트윗, 각각 150개로 되어 있습니다. 사용환경에 따라 아래 링크에서 다운 받으시면 됩니다. Mandrill.csv, Other.csv, Test.csv 이렇게 파일 3개가 있을겁니다.<br/>
+윈도우 사용자분들은 아래 링크에서 다운 받을 수 있습니다.</p>
+<p><a href="https://www.dropbox.com/sh/1k3df26mbwwbtcn/AACnrKwvjg6GGtriRAWXWZ-6a?dl=0">https://www.dropbox.com/sh/1k3df26mbwwbtcn/AACnrKwvjg6GGtriRAWXWZ-6a?dl=0</a></p>
+<p>맥 사용자분들은 아래 링크에서 다운 받을 수 있습니다.</p>
+<p><a href="https://drive.google.com/file/d/0B7Ov50qkZFF5NnJHNzZLalYtcVU/view">https://drive.google.com/file/d/0B7Ov50qkZFF5NnJHNzZLalYtcVU/view</a></p>
+<p>혹여 파일에 깨져서 실행이 안되는 분들은 책 홈페이지인 <a href="http://www.wiley.com/go/datasmart">Wiley: Data Smart: Using Data Science to Transform Information into Insight – John W. Foreman</a>에서 Chapter 3 파일을 다운 받으시면 됩니다. 아니면 아래 여기, <a href="http://media.wiley.com/product_ancillary/6X/11186614/DOWNLOAD/ch03.zip">ch03.zip</a>을 눌러서 다운 받으시면 됩니다. 받으신 파일을 압축을 푼 다음 엑셀에서 열어서 csv 파일로 바꿔주세요. 위의 파일을 다운 받으시면 그 안에 AboutMandrillApp / AboutOther / AppTokens 시트에 A열 만 떼내 각각 Mandrill.csv / Other.csv / Test.csv 파일로 저장한 뒤 진행하면 됩니다 ^^</p>
+<h2>2) 가져온 파일을 컴퓨터가 이해할 수 있도록 처리하기</h2>
+<p>가져온 파일은 단순하게 각각 150열로 되어 있는, 즉 각각 150개 트윗으로 되어 있는 자료입니다. 앞에서도 이야기했지만, 우리는 각각의 트윗이 가지고 있는 단어를 가지고 분석할 예정입니다. 따라서 우리가 가지고 있는 모든 트윗에서 단어를 다 분리해야 합니다. 『DATA SMART』에서는 엑셀을 이용하여 조금은 복잡하게 단어로 분리하고 있습니다. 그러나 R에서는 ‘<a href="https://cran.r-project.org/web/packages/tm/tm.pdf">tm</a>’이라는 패키지를 이용해서 엑셀에서 하는 것보다는 쉽게 분리할 수 있습니다. 우선 단어로 쪼개기 전에 트윗이 가지고 있는 모든 단어를 소문자로 바꾸고 문장 부호를 빈칸으로 교체합니다. 아래 코드에서는 <code>replacePunctuation()</code>이라는 함수를 만들어서 대문자를 소문자로 만들고, 문장 부호, “.”, “: ”, “?”, “!”, “;”, “,”을 모두 빈칸으로 바꿉니다. 이 함수 안에서는 <code>tolower()</code>는 대문자를 소문자로, <code>gsub()</code>는 문장 부호를 빈칸으로 바꿔주는 역할을 합니다. 이렇게 하는 이유는 ~ 그 다음 빈칸을 기준으로 단어들을 분류 시켜 하나의 matrix로 만들어줍니다.</p>
+<h3>토큰화 된 단어의 길이를 구해 의미 없는 단어들은 Cut-off 하기</h3>
+<p>컷 오프하는 방식은 데이터를 다룰 때 언제나 중요하게 다뤄지는 것 같습니다 ^^. 여기서는 글자 수 3개 이하의 토큰들을 다 컷오프시킵니다. 단순하게 말하자면 영어 단어 중 3글자 아래는 모두 지웁니다. 영어 단어 중 3글자보다 작은 단어는 통상적으로 의미가 없는 단어이기 때문입니다. 보통 이런 작업에서는 몇 개 이하의 짧은 단어를 제거하는 대신 because, instead와 같이 멈춤 단어(stop words)라고 불리는 단어들을 컷오프 하기도 합니다.</p>
+<h2>3) 나이브 베이즈 모델을 이용하여 분류 모델 만들기 – 각 단어의 App/Other에서 조건부 확률 구하기</h2>
+<p>본격적으로 앱에 관련된 단어들과 아닌 단어들의 빈도를 확률로 계산하기 전에 크게 두 가지 문제를 풀어야 합니다. 첫 번째로 트윗에 거의 나오지 않은 드문 단어들을 처리 해야 하고, 두 번째로 이런 드문 단어들의 아주 작은 확률 값이 컴퓨터가 잘 처리할 수 있도록 처리해야 합니다.</p>
+<h3>가산 평활</h3>
+<p>앱에 관련된 트윗과 아닌 트윗에서 나오지 않은 단어가 후에 나왔다면 이 단어는 어느 쪽에 속해야할까요? 이런 단어는 나이브 베이즈 확률값을 계산할 때 전체 확률 값을 0으로 만들기 때문에 일단 이런 드문 단어는 한 번 나온 것으로 가정합니다. 그러면 정말 한 번 나타난 단어들의 확률이 불공정해지기 때문에 모든 단어들의 빈도 수에 1씩 더해줍니다. 이렇게 쭉 1씩 더해주는 방식을 가산 평활법(addictive smoothing)이라고 합니다. (다른 책에서는 라플라스 추정기라고 하기도 하더군요^^)</p>
+<h3>자연 로그 값으로 변환</h3>
+<p>예컨대 확률이 0.001인 단어들이 여러 개 있다면 후에 단어들의 확률을 곱해서 클래스를 비교할 때 소숫점 수 백 개 이하의 0이 나오게 됩니다. 이 경우 컴퓨터가 제대로 처리하지 못하기 때문에 언더 플로라고 하는데 이를 해결하기 위해 0과 1 사이의 값에 대해서 자연 로그를 취합니다, 그러면 소수점 몇 백 개 이하의 수가 아니라 비교적 잘 와 닿는 음수가 되게 됩니다. 그 다음 최대 후험 비교를 수행하면 컴퓨터가 무리가 가지 않게 처리할 수 있습니다.</p>
+<p>이제 2 가지 문제를 해결했으면 이제 R에서 트윗의 각 단어들이 App에 들어갈 확률과 그 외에 들어갈 확률을 구해줍니다.</p>
+<h2>4) 앞에서 만든 모델을 가지고 새로운 트윗들이 어디에 속하는지 예측해보기</h2>
+<p>앞에서 나이브 베이즈 모델을 이용하여 만든 분류 모델은 사실상 두 개의 조건부 확률 표를 만드는 것에 불과합니다. 이제 이 확률표라는 증거들을 가지고 새로운 트윗이 App에 관련된 트윗인지 아닌지 분류해봅시다. 테스트할 20의 트윗은 반은 App에 관련된 트윗이고 반은 상관 없는 트윗으로 이루어져 있습니다. 앞에서 한 토큰화, 가산 평활, 자연 로그 과정을 거친 뒤 이미 만들어 놓은 조건부 확률을 통해 그 단어들이 app에 관련될 확률과 그 외에 관련된 확률을 구해 비교합니다. 비교했을 때 확률 값이 더 큰 쪽으로 클래스를 분류합니다. 이제 정말 이 모델이 정확한 지 확인해 봅시다. 20개 중에 하나 빼고는 다 맞혔네요^^ R로 구현하는 코드는 다음과 같습니다. 윈도우 사용자 분들은 R코드 마지막 줄에 <code>View(cbind(classified,tweets.test$Tweet))</code>으로 하시면 더 멋진 결과를 보실 수 있습니다. 긴 글 읽어주셔서 감사합니다~!</p>
+<style>.gist table { margin-bottom: 0; }</style>
+<div class="gist-oembed" data-gist="dialektike/4621c4b82467058ecbdb81a37b56223c.json"></div>
+
+<div class="jp-relatedposts" id="jp-relatedposts">
+<h3 class="jp-relatedposts-headline"><em>Related</em></h3>
+</div> </div><!-- .entry-content -->
+<footer class="entry-meta">
+			This entry was posted in <a href="../../../category/data-analysis.html" rel="category tag">Data analysis</a> and tagged <a href="../../../tag/r.html" rel="tag">R</a> on <a href="418.html" rel="bookmark" title="7:28 am"><time class="entry-date" datetime="2016-04-13T07:28:35+00:00">2016/04/13</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="../../../author/baeseo/index.html" rel="author" title="View all posts by baeseo">baeseo</a></span></span>.								</footer><!-- .entry-meta -->
+</article><!-- #post -->
+<nav class="nav-single">
+<h3 class="assistive-text">Post navigation</h3>
+<span class="nav-previous"><a href="../04/414.html" rel="prev"><span class="meta-nav">←</span> #소피스트</a></span>
+<span class="nav-next"><a href="../../06/01/429.html" rel="next">R에서 Gephi 없이 igraph을 이용하여 군집화 하기 <span class="meta-nav">→</span></a></span>
+</nav><!-- .nav-single -->
+<div class="comments-area" id="comments">
+
+<input id="comment_parent" name="comment_parent" type="hidden" value=""/>
+<p class="akismet_comment_form_privacy_notice">This site uses Akismet to reduce spam. <a href="https://akismet.com/privacy/" rel="nofollow noopener" target="_blank">Learn how your comment data is processed</a>.</p>
+</div><!-- #comments .comments-area -->
+</div><!-- #content -->
+</div><!-- #primary -->
+<div class="widget-area" id="secondary" role="complementary">
+ <aside class="widget widget_recent_entries" id="recent-posts-2"> <h3 class="widget-title">Recent Posts</h3> <ul>
+<li>
+<a href="../../../2017/07/29/485.html">LOPES, 제6회 교통데이터 활용공모전 최우수상 수상!</a>
+</li>
+<li>
+<a href="../../../2017/01/30/481.html">KBO 팀간 승패 자료를 github.com 에 올렸습니다.</a>
+</li>
+<li>
+<a href="../../08/28/469.html">LOPES, 제4회 관광 빅데이터 분석대회 동상 수상!</a>
+</li>
+<li>
+<a href="../../06/01/429.html">R에서 Gephi 없이 igraph을 이용하여 군집화 하기</a>
+</li>
+<li>
+<a href="418.html">R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기</a>
+</li>
+</ul>
+</aside> <aside class="widget widget_categories" id="categories-2"><h3 class="widget-title">Categories</h3> <ul>
+<li class="cat-item cat-item-65"><a href="../../../category/data-analysis.html">Data analysis</a> (6)
+</li>
+<li class="cat-item cat-item-64"><a href="../../../category/etc.html">ETC.</a> (2)
+</li>
+<li class="cat-item cat-item-1"><a href="../../../category/uncategorized/index.html">Uncategorized</a> (40)
+</li>
+<li class="cat-item cat-item-3"><a href="../../../category/history-of-philosophy/index.html">서양철학사</a> (48)
+<ul class="children">
+<li class="cat-item cat-item-5"><a href="../../../category/history-of-philosophy/ancient-philosophy/index.html">고대철학</a> (13)
+</li>
+<li class="cat-item cat-item-31"><a href="../../../category/history-of-philosophy/modern-philosophy/index.html">근대철학</a> (11)
+</li>
+<li class="cat-item cat-item-51"><a href="../../../category/history-of-philosophy/contemporary-philosophy/index.html">현대철학</a> (19)
+</li>
+</ul>
+</li>
+</ul>
+</aside><aside class="widget widget_text" id="text-3"><h3 class="widget-title">AD</h3> <div class="textwidget"><p><script async="" src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><br/>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2836392858465500",
+          enable_page_level_ads: true
+     });
+</script></p>
+</div>
+</aside> </div><!-- #secondary -->
+</div><!-- #main .wrapper -->
+<footer id="colophon" role="contentinfo">
+<div class="site-info">
+<a class="imprint" href="https://wordpress.org/" title="Semantic Personal Publishing Platform">
+				Proudly powered by WordPress			</a>
+</div><!-- .site-info -->
+</footer><!-- #colophon -->
+</div><!-- #page -->
+<div style="display:none">
+</div>
+<script type="text/javascript">
+		window.WPCOM_sharing_counts = {"http:\/\/www.philosopher.co.kr\/2016\/04\/13\/418":418};
+	</script>
+<script src="../../../wp-content/plugins/jetpack/modules/photon/photon.js%3Fver=20130122" type="text/javascript"></script>
+<script src="http://s0.wp.com/wp-content/js/devicepx-jetpack.js?ver=202643" type="text/javascript"></script>
+<script src="http://s.gravatar.com/js/gprofiles.js?ver=2026Octaa" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var WPGroHo = {"my_hash":""};
+/* ]]> */
+</script>
+<script src="../../../wp-content/plugins/jetpack/modules/wpgroho.js%3Fver=4.6.29" type="text/javascript"></script>
+<script src="../../../wp-includes/js/comment-reply.min.js%3Fver=4.6.29" type="text/javascript"></script>
+<script src="../../../wp-content/themes/twentytwelve/js/navigation.js%3Fver=20141205" type="text/javascript"></script>
+<script src="../../../wp-includes/js/wp-embed.min.js%3Fver=4.6.29" type="text/javascript"></script>
+<script src="../../../wp-content/plugins/jetpack/modules/shortcodes/js/gist.js%3Fver=4.6.29" type="text/javascript"></script>
+<script async="async" src="../../../wp-content/plugins/akismet/_inc/form.js%3Fver=4.1" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var sharing_js_options = {"lang":"en","counts":"1"};
+/* ]]> */
+</script>
+<script src="../../../wp-content/plugins/jetpack/modules/sharedaddy/sharing.js%3Fver=4.5.3" type="text/javascript"></script>
+<script type="text/javascript">
+var windowOpen;
+			jQuery( document.body ).on( 'click', 'a.share-twitter', function() {
+				// If there's another sharing window open, close it.
+				if ( 'undefined' !== typeof windowOpen ) {
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery( this ).attr( 'href' ), 'wpcomtwitter', 'menubar=1,resizable=1,width=600,height=350' );
+				return false;
+			});
+var windowOpen;
+			jQuery( document.body ).on( 'click', 'a.share-facebook', function() {
+				// If there's another sharing window open, close it.
+				if ( 'undefined' !== typeof windowOpen ) {
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery( this ).attr( 'href' ), 'wpcomfacebook', 'menubar=1,resizable=1,width=600,height=400' );
+				return false;
+			});
+var windowOpen;
+			jQuery( document.body ).on( 'click', 'a.share-google-plus-1', function() {
+				// If there's another sharing window open, close it.
+				if ( 'undefined' !== typeof windowOpen ) {
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery( this ).attr( 'href' ), 'wpcomgoogle-plus-1', 'menubar=1,resizable=1,width=480,height=550' );
+				return false;
+			});
+</script>
+<!--[if IE]>
+		<script type="text/javascript">
+		if ( 0 === window.location.hash.indexOf( '#comment-' ) ) {
+			// window.location.reload() doesn't respect the Hash in IE
+			window.location.hash = window.location.hash;
+		}
+		</script>
+		<![endif]-->
+<script type="text/javascript">
+			var comm_par_el = document.getElementById( 'comment_parent' ),
+			    comm_par = (comm_par_el && comm_par_el.value) ? comm_par_el.value : '',
+			    frame = document.getElementById( 'jetpack_remote_comment' ),
+			    tellFrameNewParent;
+
+			tellFrameNewParent = function() {
+				if ( comm_par ) {
+					frame.src = "https://jetpack.wordpress.com/jetpack-comment/?blogid=108212134&postid=418&comment_registration=0&require_name_email=1&stc_enabled=1&stb_enabled=1&show_avatars=1&avatar_default=mystery&greeting=Leave+a+Reply&greeting_reply=Leave+a+Reply+to+%25s&color_scheme=light&lang=en_US&jetpack_version=4.5.3&sig=1d83113249b2dd6c6a1ad1f8f59d4d35c1e54615#parent=http%3A%2F%2Fwww.philosopher.co.kr%2F2016%2F04%2F13%2F418" + '&replytocom=' + parseInt( comm_par, 10 ).toString();
+				} else {
+					frame.src = "https://jetpack.wordpress.com/jetpack-comment/?blogid=108212134&postid=418&comment_registration=0&require_name_email=1&stc_enabled=1&stb_enabled=1&show_avatars=1&avatar_default=mystery&greeting=Leave+a+Reply&greeting_reply=Leave+a+Reply+to+%25s&color_scheme=light&lang=en_US&jetpack_version=4.5.3&sig=1d83113249b2dd6c6a1ad1f8f59d4d35c1e54615#parent=http%3A%2F%2Fwww.philosopher.co.kr%2F2016%2F04%2F13%2F418";
+				}
+			};
+
+	
+			if ( 'undefined' !== typeof addComment ) {
+				addComment._Jetpack_moveForm = addComment.moveForm;
+
+				addComment.moveForm = function( commId, parentId, respondId, postId ) {
+					var returnValue = addComment._Jetpack_moveForm( commId, parentId, respondId, postId ), cancelClick, cancel;
+
+					if ( false === returnValue ) {
+						cancel = document.getElementById( 'cancel-comment-reply-link' );
+						cancelClick = cancel.onclick;
+						cancel.onclick = function() {
+							var cancelReturn = cancelClick.call( this );
+							if ( false !== cancelReturn ) {
+								return cancelReturn;
+							}
+
+							if ( !comm_par ) {
+								return cancelReturn;
+							}
+
+							comm_par = 0;
+
+							tellFrameNewParent();
+
+							return cancelReturn;
+						};
+					}
+
+					if ( comm_par == parentId ) {
+						return returnValue;
+					}
+
+					comm_par = parentId;
+
+					tellFrameNewParent();
+
+					return returnValue;
+				};
+			}
+
+	
+			if ( window.postMessage ) {
+				if ( document.addEventListener ) {
+					window.addEventListener( 'message', function( event ) {
+						if ( "https:\/\/jetpack.wordpress.com" !== event.origin ) {
+							return;
+						}
+
+						jQuery( frame ).height( event.data );
+					} );
+				} else if ( document.attachEvent ) {
+					window.attachEvent( 'message', function( event ) {
+						if ( "https:\/\/jetpack.wordpress.com" !== event.origin ) {
+							return;
+						}
+
+						jQuery( frame ).height( event.data );
+					} );
+				}
+			}
+		</script>
+<script async="" defer="" src="http://stats.wp.com/e-202643.js" type="text/javascript"></script>
+<script type="text/javascript">
+	_stq = window._stq || [];
+	_stq.push([ 'view', {v:'ext',j:'1:4.5.3',blog:'108212134',post:'418',tz:'0',srv:'www.philosopher.co.kr'} ]);
+	_stq.push([ 'clickTrackerInit', '108212134', '418' ]);
+</script>
+</body>
+</html>

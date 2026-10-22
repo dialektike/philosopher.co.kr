@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<!--[if IE 7]>
+<html class="ie ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html class="ie ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 7) & !(IE 8)]><!-->
+<html lang="en-US">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width" name="viewport"/>
+<title>R에서 Gephi 없이 igraph을 이용하여 군집화 하기 | LOPES</title>
+<link href="https://gmpg.org/xfn/11" rel="profile"/>
+<link href="http://www.philosopher.co.kr/xmlrpc.php" rel="pingback"/>
+<!--[if lt IE 9]>
+<script src="http://www.philosopher.co.kr/wp-content/themes/twentytwelve/js/html5.js?ver=3.7.0" type="text/javascript"></script>
+<![endif]-->
+<script type="text/javascript">
+		var ajaxurl = 'http://www.philosopher.co.kr/wp-admin/admin-ajax.php';
+		</script>
+<link href="http://s0.wp.com/" rel="dns-prefetch"/>
+<link href="http://s.gravatar.com/" rel="dns-prefetch"/>
+<link href="http://s.w.org/" rel="dns-prefetch"/>
+<link href="../../../feed" rel="alternate" title="LOPES » Feed" type="application/rss+xml"/>
+<link href="../../../comments/feed" rel="alternate" title="LOPES » Comments Feed" type="application/rss+xml"/>
+<link href="429/feed" rel="alternate" title="LOPES » R에서 Gephi 없이 igraph을 이용하여 군집화 하기 Comments Feed" type="application/rss+xml"/>
+<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2\/svg\/","svgExt":".svg","source":{"concatemoji":"http:\/\/www.philosopher.co.kr\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.6.29"}};
+			!function(e,o,t){var a,n,r;function i(e){var t=o.createElement("script");t.src=e,t.type="text/javascript",o.getElementsByTagName("head")[0].appendChild(t)}for(r=Array("simple","flag","unicode8","diversity","unicode9"),t.supports={everything:!0,everythingExceptFlag:!0},n=0;n<r.length;n++)t.supports[r[n]]=function(e){var t,a,n=o.createElement("canvas"),r=n.getContext&&n.getContext("2d"),i=String.fromCharCode;if(!r||!r.fillText)return!1;switch(r.textBaseline="top",r.font="600 32px Arial",e){case"flag":return(r.fillText(i(55356,56806,55356,56826),0,0),n.toDataURL().length<3e3)?!1:(r.clearRect(0,0,n.width,n.height),r.fillText(i(55356,57331,65039,8205,55356,57096),0,0),a=n.toDataURL(),r.clearRect(0,0,n.width,n.height),r.fillText(i(55356,57331,55356,57096),0,0),a!==n.toDataURL());case"diversity":return r.fillText(i(55356,57221),0,0),a=(t=r.getImageData(16,16,1,1).data)[0]+","+t[1]+","+t[2]+","+t[3],r.fillText(i(55356,57221,55356,57343),0,0),a!=(t=r.getImageData(16,16,1,1).data)[0]+","+t[1]+","+t[2]+","+t[3];case"simple":return r.fillText(i(55357,56835),0,0),0!==r.getImageData(16,16,1,1).data[0];case"unicode8":return r.fillText(i(55356,57135),0,0),0!==r.getImageData(16,16,1,1).data[0];case"unicode9":return r.fillText(i(55358,56631),0,0),0!==r.getImageData(16,16,1,1).data[0]}return!1}(r[n]),t.supports.everything=t.supports.everything&&t.supports[r[n]],"flag"!==r[n]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[r[n]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(a=function(){t.readyCallback()},o.addEventListener?(o.addEventListener("DOMContentLoaded",a,!1),e.addEventListener("load",a,!1)):(e.attachEvent("onload",a),o.attachEvent("onreadystatechange",function(){"complete"===o.readyState&&t.readyCallback()})),(a=t.source||{}).concatemoji?i(a.concatemoji):a.wpemoji&&a.twemoji&&(i(a.twemoji),i(a.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link href="../../../wp-content/themes/twentytwelve/fonts/font-open-sans.css%3Fver=20230328.css" id="twentytwelve-fonts-css" media="all" rel="stylesheet" type="text/css"/>
+<link href="../../../wp-content/themes/twentytwelve/style.css%3Fver=20230328.css" id="twentytwelve-style-css" media="all" rel="stylesheet" type="text/css"/>
+<link href="../../../wp-content/themes/twentytwelve/css/blocks.css%3Fver=20230213.css" id="twentytwelve-block-style-css" media="all" rel="stylesheet" type="text/css"/>
+<!--[if lt IE 9]>
+<link rel='stylesheet' id='twentytwelve-ie-css'  href='http://www.philosopher.co.kr/wp-content/themes/twentytwelve/css/ie.css?ver=20150214' type='text/css' media='all' />
+<![endif]-->
+<link href="../../../wp-content/plugins/jetpack/_inc/social-logos/social-logos.min.css%3Fver=1.css" id="social-logos-css" media="all" rel="stylesheet" type="text/css"/>
+<link href="../../../wp-content/plugins/jetpack/css/jetpack.css%3Fver=4.5.3.css" id="jetpack_css-css" media="all" rel="stylesheet" type="text/css"/>
+<script src="../../../wp-includes/js/jquery/jquery.js%3Fver=1.12.4" type="text/javascript"></script>
+<script src="../../../wp-includes/js/jquery/jquery-migrate.min.js%3Fver=1.4.1" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var related_posts_js_options = {"post_heading":"h4"};
+/* ]]> */
+</script>
+<script src="../../../wp-content/plugins/jetpack/modules/related-posts/related-posts.js%3Fver=20150408" type="text/javascript"></script>
+<link href="../../../wp-json/index.html" rel="https://api.w.org/"/>
+<link href="../../../xmlrpc.php%3Frsd" rel="EditURI" title="RSD" type="application/rsd+xml"/>
+<link href="../../../wp-includes/wlwmanifest.xml" rel="wlwmanifest" type="application/wlwmanifest+xml"/>
+<link href="../../04/13/418.html" rel="prev" title="R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기"/>
+<link href="../../08/28/469.html" rel="next" title="LOPES, 제4회 관광 빅데이터 분석대회 동상 수상!"/>
+<meta content="WordPress 4.6.29" name="generator"/>
+<link href="429.html" rel="canonical"/>
+<link href="http://wp.me/p7k2V0-6V" rel="shortlink"/>
+<link href="../../../wp-json/oembed/1.0/embed%3Furl=http:%252F%252Fwww.philosopher.co.kr%252F2016%252F06%252F01%252F429" rel="alternate" type="application/json+oembed"/>
+<link href="../../../wp-json/oembed/1.0/embed%3Furl=http:%252F%252Fwww.philosopher.co.kr%252F2016%252F06%252F01%252F429&amp;format=xml" rel="alternate" type="text/xml+oembed"/>
+<link href="http://v0.wordpress.com/" rel="dns-prefetch"/>
+<link href="http://i0.wp.com/" rel="dns-prefetch"/>
+<link href="http://i1.wp.com/" rel="dns-prefetch"/>
+<link href="http://i2.wp.com/" rel="dns-prefetch"/>
+<link href="http://jetpack.wordpress.com/" rel="dns-prefetch"/>
+<link href="http://s0.wp.com/" rel="dns-prefetch"/>
+<link href="http://s1.wp.com/" rel="dns-prefetch"/>
+<link href="http://s2.wp.com/" rel="dns-prefetch"/>
+<link href="http://public-api.wordpress.com/" rel="dns-prefetch"/>
+<link href="http://0.gravatar.com/" rel="dns-prefetch"/>
+<link href="http://1.gravatar.com/" rel="dns-prefetch"/>
+<link href="http://2.gravatar.com/" rel="dns-prefetch"/>
+<style type="text/css">img#wpstats{display:none}</style>
+<!-- Jetpack Open Graph Tags -->
+<meta content="article" property="og:type"/>
+<meta content="R에서 Gephi 없이 igraph을 이용하여 군집화 하기" property="og:title"/>
+<meta content="http://www.philosopher.co.kr/2016/06/01/429" property="og:url"/>
+<meta content="안녕하세요. 외대 철학과 스터디그룹 LOPES의 추선식입니다. 이번에는 오직 R만을 이용하여 와인데이터를 분석하고 군집화 해보겠습니다. 앞서 같은 스터디 그룹인 배서연 학우가 쓴 “와인 구매 데이터를 R로 분석하여 Gephi로 군집화, 시각화 하기”에서 Gephi를 이용해서 군집화 했었습니다. 그렇지만 저는 이 글에서 Gephi …" property="og:description"/>
+<meta content="2016-06-01T08:14:32+00:00" property="article:published_time"/>
+<meta content="2016-07-08T07:25:41+00:00" property="article:modified_time"/>
+<meta content="LOPES" property="og:site_name"/>
+<meta content="https://s0.wp.com/i/blank.jpg" property="og:image"/>
+<meta content="en_US" property="og:locale"/>
+<meta content="summary" name="twitter:card"/>
+</head>
+<body class="single single-post postid-429 single-format-standard custom-font-enabled">
+<div class="hfeed site" id="page">
+<header class="site-header" id="masthead">
+<hgroup>
+<h1 class="site-title"><a href="../../../index.html" rel="home">LOPES</a></h1>
+<h2 class="site-description">외대 철학과 스터디 모임</h2>
+</hgroup>
+<nav class="main-navigation" id="site-navigation">
+<button class="menu-toggle">Menu</button>
+<a class="assistive-text" href="429.html#content">Skip to content</a>
+</nav><!-- #site-navigation -->
+</header><!-- #masthead -->
+<div class="wrapper" id="main">
+<div class="site-content" id="primary">
+<div id="content" role="main">
+<article class="post-429 post type-post status-publish format-standard hentry category-data-analysis tag-igraph tag-r" id="post-429">
+<header class="entry-header">
+<h1 class="entry-title">R에서 Gephi 없이 igraph을 이용하여 군집화 하기</h1>
+<!-- .comments-link -->
+</header><!-- .entry-header -->
+<div class="entry-content">
+<p>안녕하세요. 외대 철학과 스터디그룹 LOPES의 추선식입니다. 이번에는 오직 R만을 이용하여 와인데이터를 분석하고 군집화 해보겠습니다. 앞서 같은 스터디 그룹인 배서연 학우가 쓴 “<a href="../../03/14/394.html">와인 구매 데이터를 R로 분석하여 Gephi로 군집화, 시각화 하기</a>“에서 Gephi를 이용해서 군집화 했었습니다. 그렇지만 저는 이 글에서 Gephi 없이 R을 이용해서 와인데이터를 군집화하고 그 결과를 서로 비교해보겠습니다.</p>
+<h2>준비 작업: 『DATA SMART』의 예제 와인데이터 이용하기</h2>
+<p>원본 와인데이터는 아래 링크로 가서 chapter2를 클릭하여 자료를 다운받으시고, WineKMC 파일 안의 Matrix시트를 R에서 지정한 디렉토리 폴더에 csv형식으로 내보내 사용하시거나 혹은 chapter10를 클릭하여 자료를 다운 받은 다음 그 안의 WineKMC.csv 파일을 사용하시면 됩니다.<br/>
+<a href="http://www.wiley.com/go/datasmart">Wiley: Data Smart: Using Data Science to Transform Information into Insight – John W. Foreman</a></p>
+<h2>R로 와인데이터 분석: (코사인 유사도 행렬 구하기 및 Cut-off 하기)</h2>
+<p>와인데이터의 군집화를 위해 먼저 해야 할 작업은 코사인 유사도 행렬을 만드는 것입니다. 코사인유사도는 각 구매자 간 구매데이터의 유사성에 비중을 둔 거리 계산법으로 이 예제에서는 와인 데이터의 구매 유사성을 토대로 구매자들 간의 거리를 측정할 수 있습니다. 코사인 유사도는 0과 1 사이의 값을 가지는데 코사인 유사도로 나타난 구매자들 간의 거리는 구매 데이터의 유사성 정도에 따라서 유사성이 강하면 그값이 1에 가까우며 유사성이 약할수록 0에 가까워지게 됩니다. 즉 이것으로 구매 데이터를 사람과 사람 간의 관계로 바꾸어 이후 군집화의 초석을 쌓는 것입니다.</p>
+<p>다음 작업으로는 컷오프를 하는 것입니다. 이것을 하는 이유로는 와인 구매 데이터의 유사성을 통해 고객들 간의 모든 관계를 파악할 수 있지만, 그 관계가 너무 많아 데이터가 복잡하기 때문입니다. 따라서 중요하지 않은 관계는 지우고 강한 관계가 있는 데이터만 남기는 과정이 바로 컷오프입니다. 여기서 중요한 관계만 남기는 방법으로는 앞선 글애서와 똑같이 유사성이 강한 상위 20%만 남기는 것 입니다.</p>
+<h2>군집화하기: Igraph 패키지를 이용해서 군집화하기</h2>
+<p>군집화를 위해서는 Igraph 패키지가 필요합니다. 이 패키지가 기존의 Gephi의 기능인 네트워크 그래프를 다루는 일을 수행하기 때문입니다. Igraph 패키지는 컷오프 한 와인데이터 구매자들 간의 관계를 보고 군집화해주는 역할을 합니다. 이것을 이용해 R로 시각화를 해볼 순 있지만, 아직 모듈성 최적화가 되지 않은 상태이기에 군집 간 구분이 힘들기에 모듈성 최적화의 과정을 필요로 합니다.</p>
+<p>따라서 Igraph로 군집화 된 것의 모듈성 최적화를 위해walktrap.community 나 multilevel.community 함수를 사용해야 합니다. 각 함수를 사용해서 군집의 최적화 즉 모듈성을 최적화하게 되면 모듈성은 walktrap.community 방식이 더 극대화되지만 두 방식의 모듈성 값 차이는 미세합니다. 두 가지 방식에 대한 더 자세한 설명을 알고 싶다면 이 두 기능이 내포된 Igraph 패키지와 각 함수에 대하여 <a href="http://www.inside-r.org/packages">Inside-r</a> 링크에서 직접 찾아보실 수 있습니다.</p>
+<h2>R 코드 내용: 다음은 전체과정에 대한 R 코드입니다.</h2>
+<style>.gist table { margin-bottom: 0; }</style>
+<div class="gist-oembed" data-gist="dialektike/40f8057232ebd39e816979a7af1e9424.json"></div>
+<h2>R 코드 설명</h2>
+<p>먼저 코사인 유사도를 구하는 데 필요한 패키지인 lsa를 다운 받습니다. 그 후 군집화에 사용할 패키지인 Igraph패키지를 다운 받습니다. 이제 와인 데이터를 읽어오고 코사인 유사도 그래프를 만들기 위한 작업(행,렬 변환 과 NA값 변환)을 합니다. 기본 작업이 완료되면 cosine 함수를 이용하여 코사인 유사도를 만들고 for 구문으로 대각선의 값을 0으로 바꿔 줍니다. 코사인 유사도 그래프가 완성되었으면 그것에 대한 컷오프 과정을 진행합니다. 컷오프 과정은 앞서 배서연 학우가 올린 글에서 설명되었기에 넘어가겠습니다.</p>
+<p>이제 Igraph 패키지를 사용하게 되는데 가장 처음 할 일은 인접성 행렬 그래프를 만드는 것입니다. 인접성 행렬 그래프는 네트워크 데이터를 나타내는 그래프 중 하나로서 인접성 행렬을 통해 네트워크 데이터가 드러내는 관계를 보여주는 그래프입니다. 간단히 말해서 네트워크 데이터를 노드와 에지로 표현한 그래프라 할 수 있습니다.</p>
+<p>코드에서 graph.adjacency 함수가 인접 행렬 그래프를 만들어 줍니다. graph.adjacency 함수는 방향성과 가중치에 따라서 인접 행렬을 다양하게 해석할 수 있기에 여기서는 가중치는 주지 않고 무방향성(undirected)을 설정해 줍니다.<br/>
+다음으로 Igraph의 walktrap.community 함수를 사용합니다. 이 함수는 무작위 걸음(random walk)을 통해 그 걸음 길이가 짧을수록 같은 군집으로 묶는 역할을 합니다. 따라서 각 사람 간의 군집이 형성되는데 이것을 membership 함수를 통해 확인할 수 있습니다. 이어서 이 군집화 결과를 as.integer 함수를 통해 정수형 벡터로 바꾸어 줍니다.<br/>
+남은 과정은 이제 기존의 정보들을 덧붙이는 과정입니다. 이것은 기존 와인에 대한 정보를 붙이고 하나의 데이터 벡터로 바꾸는 과정입니다. 이 과정을 진행하고 나면 최종 결과인 각 군집별 구매한 와인의 특성을 파악할 수 있습니다.</p>
+<h2>결과 비교해보기: Gephi 와 두 가지 방식(walktrap,multilevel)의 함수 결과 비교</h2>
+<p>비교하는 것에 앞서 결과를 추측해보자면 같은 군집화 알고리즘을 사용한다면 군집화의 결과가 같을 것이고 그렇지 않으면 차이가 있을 것이라 생각되어집니다.</p>
+<p>군집화의 결과를 R로 비교해 보기 위해서는 19번째 코드까지 진행하고 그 이후 20번째 코드부터 다르게 진행합니다. 우선 walktrap.community 함수부터 사용해서 사람과 할당 군집목록을 만듭니다. 다음의 코드를 이용합니다.</p>
+<pre><code class="R">winedata.wtc &lt;- walktrap.community(winedata.graph)
+membership(winedata.wtc)
+walktrap.membership &lt;- print(membership(winedata.wtc))
+walktrap.community &lt;- data.frame(walktrap.membership)
+</code></pre>
+<p>위 코드로 walktrap 함수의 구매자 별 군집 목록을 만듭니다. 같은 방식으로 multilevel.community 함수를 적용해 구매자 별 군집 목록을 완성합니다. 다음으로는 맨 위 링크에서 Gephi 로 작업한 파일을 Gephi 내부에서 csv 파일 형식으로 내보냅니다. Gephi에서 파일을 내보내는 방법은 gephi의  Data laboratory 섹션에서  Export table을 클릭하여 내보낼 수 있습니다. csv 형식으로 내보낸 파일을 R에서 읽어옵니다. R에서 csv 파일을 읽는 방법은 <code>read.csv</code> 함수를 사용하면 됩니다. 다음과 같이 <code>gephi &lt;- read.csv("CommunitiesGephi.csv")</code> 사용합니다. R에서 불러온 다음엔 Gephi의 군집데이터를 이름을 토대로 다시 정렬해줍니다. 다음의 코드로 정렬할 수 있습니다.</p>
+<pre><code class="R">library(plyr)
+arrange(gephi,label)
+gephi.community &lt;- arrange(gephi,label)
+</code></pre>
+<p>이제 3개 방식의 군집 목록을 R에서 한 번에 비교해보도록 하겠습니다. 3개 방식을 한 번에 보는 방법은 <code>cbind()</code>함수를 사용하여 하나의 목록으로 합칠 수 있습니다.</p>
+<pre><code class="R">walktrap.class &lt;- walktrap.community$walktrap.membership
+comparison.class &lt;- cbind(gephi.community,walktrap.class)
+multilevel.class &lt;- multilevel.community$multilevel.membership
+comparison.class &lt;- cbind(comparison.class,multilevel.class)
+</code></pre>
+<p>위의 코드를 통해 하나의 목록으로 만들었다면 <code>arrange()</code> 함수를 통해서 방식별 정렬을 하여 비교할 수 있습니다. 예를 들면 <code>arrange(comparison.class,modularity_class)</code> 와 같이 Gephi의 군집을 기준으로 다른 방식과 비교한 것을 볼 수 있습니다.</p>
+<p>3가지 방식의 군집화를 비교해본 결과 처음에는 모듈성이 거의 유사하기에 Gephi와 Igraph의 방식들의 군집화 결과가 서로 같을 것으로 생각했지만, 정렬을 통해 비교해본 결과 분명히 다르게 군집화가 이루어졌음을 확인할 수 있었습니다. 같은 자료, 같은 모듈성이지만 군집화 방식 도구에 따라 군집의 결과가 다르게 나누어진다는 사실에 놀랐습니다. 읽어주셔서 감사합니다</p>
+
+<div class="jp-relatedposts" id="jp-relatedposts">
+<h3 class="jp-relatedposts-headline"><em>Related</em></h3>
+</div> </div><!-- .entry-content -->
+<footer class="entry-meta">
+			This entry was posted in <a href="../../../category/data-analysis.html" rel="category tag">Data analysis</a> and tagged <a href="../../../tag/igraph.html" rel="tag">igraph</a>, <a href="../../../tag/r.html" rel="tag">R</a> on <a href="429.html" rel="bookmark" title="8:14 am"><time class="entry-date" datetime="2016-06-01T08:14:32+00:00">2016/06/01</time></a><span class="by-author"> by <span class="author vcard"><a class="url fn n" href="../../../author/1993choo/index.html" rel="author" title="View all posts by 선식">선식</a></span></span>.								</footer><!-- .entry-meta -->
+</article><!-- #post -->
+<nav class="nav-single">
+<h3 class="assistive-text">Post navigation</h3>
+<span class="nav-previous"><a href="../../04/13/418.html" rel="prev"><span class="meta-nav">←</span> R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기</a></span>
+<span class="nav-next"><a href="../../08/28/469.html" rel="next">LOPES, 제4회 관광 빅데이터 분석대회 동상 수상! <span class="meta-nav">→</span></a></span>
+</nav><!-- .nav-single -->
+<div class="comments-area" id="comments">
+
+<input id="comment_parent" name="comment_parent" type="hidden" value=""/>
+<p class="akismet_comment_form_privacy_notice">This site uses Akismet to reduce spam. <a href="https://akismet.com/privacy/" rel="nofollow noopener" target="_blank">Learn how your comment data is processed</a>.</p>
+</div><!-- #comments .comments-area -->
+</div><!-- #content -->
+</div><!-- #primary -->
+<div class="widget-area" id="secondary" role="complementary">
+ <aside class="widget widget_recent_entries" id="recent-posts-2"> <h3 class="widget-title">Recent Posts</h3> <ul>
+<li>
+<a href="../../../2017/07/29/485.html">LOPES, 제6회 교통데이터 활용공모전 최우수상 수상!</a>
+</li>
+<li>
+<a href="../../../2017/01/30/481.html">KBO 팀간 승패 자료를 github.com 에 올렸습니다.</a>
+</li>
+<li>
+<a href="../../08/28/469.html">LOPES, 제4회 관광 빅데이터 분석대회 동상 수상!</a>
+</li>
+<li>
+<a href="429.html">R에서 Gephi 없이 igraph을 이용하여 군집화 하기</a>
+</li>
+<li>
+<a href="../../04/13/418.html">R로 나이브 베이즈 규칙을 사용하여 트위터 분류 모델 만들기</a>
+</li>
+</ul>
+</aside> <aside class="widget widget_categories" id="categories-2"><h3 class="widget-title">Categories</h3> <ul>
+<li class="cat-item cat-item-65"><a href="../../../category/data-analysis.html">Data analysis</a> (6)
+</li>
+<li class="cat-item cat-item-64"><a href="../../../category/etc.html">ETC.</a> (2)
+</li>
+<li class="cat-item cat-item-1"><a href="../../../category/uncategorized/index.html">Uncategorized</a> (40)
+</li>
+<li class="cat-item cat-item-3"><a href="../../../category/history-of-philosophy/index.html">서양철학사</a> (48)
+<ul class="children">
+<li class="cat-item cat-item-5"><a href="../../../category/history-of-philosophy/ancient-philosophy/index.html">고대철학</a> (13)
+</li>
+<li class="cat-item cat-item-31"><a href="../../../category/history-of-philosophy/modern-philosophy/index.html">근대철학</a> (11)
+</li>
+<li class="cat-item cat-item-51"><a href="../../../category/history-of-philosophy/contemporary-philosophy/index.html">현대철학</a> (19)
+</li>
+</ul>
+</li>
+</ul>
+</aside><aside class="widget widget_text" id="text-3"><h3 class="widget-title">AD</h3> <div class="textwidget"><p><script async="" src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><br/>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-2836392858465500",
+          enable_page_level_ads: true
+     });
+</script></p>
+</div>
+</aside> </div><!-- #secondary -->
+</div><!-- #main .wrapper -->
+<footer id="colophon" role="contentinfo">
+<div class="site-info">
+<a class="imprint" href="https://wordpress.org/" title="Semantic Personal Publishing Platform">
+				Proudly powered by WordPress			</a>
+</div><!-- .site-info -->
+</footer><!-- #colophon -->
+</div><!-- #page -->
+<div style="display:none">
+</div>
+<script type="text/javascript">
+		window.WPCOM_sharing_counts = {"http:\/\/www.philosopher.co.kr\/2016\/06\/01\/429":429};
+	</script>
+<script src="../../../wp-content/plugins/jetpack/modules/photon/photon.js%3Fver=20130122" type="text/javascript"></script>
+<script src="http://s0.wp.com/wp-content/js/devicepx-jetpack.js?ver=202643" type="text/javascript"></script>
+<script src="http://s.gravatar.com/js/gprofiles.js?ver=2026Octaa" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var WPGroHo = {"my_hash":""};
+/* ]]> */
+</script>
+<script src="../../../wp-content/plugins/jetpack/modules/wpgroho.js%3Fver=4.6.29" type="text/javascript"></script>
+<script src="../../../wp-includes/js/comment-reply.min.js%3Fver=4.6.29" type="text/javascript"></script>
+<script src="../../../wp-content/themes/twentytwelve/js/navigation.js%3Fver=20141205" type="text/javascript"></script>
+<script src="../../../wp-includes/js/wp-embed.min.js%3Fver=4.6.29" type="text/javascript"></script>
+<script src="../../../wp-content/plugins/jetpack/modules/shortcodes/js/gist.js%3Fver=4.6.29" type="text/javascript"></script>
+<script async="async" src="../../../wp-content/plugins/akismet/_inc/form.js%3Fver=4.1" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var sharing_js_options = {"lang":"en","counts":"1"};
+/* ]]> */
+</script>
+<script src="../../../wp-content/plugins/jetpack/modules/sharedaddy/sharing.js%3Fver=4.5.3" type="text/javascript"></script>
+<script type="text/javascript">
+var windowOpen;
+			jQuery( document.body ).on( 'click', 'a.share-twitter', function() {
+				// If there's another sharing window open, close it.
+				if ( 'undefined' !== typeof windowOpen ) {
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery( this ).attr( 'href' ), 'wpcomtwitter', 'menubar=1,resizable=1,width=600,height=350' );
+				return false;
+			});
+var windowOpen;
+			jQuery( document.body ).on( 'click', 'a.share-facebook', function() {
+				// If there's another sharing window open, close it.
+				if ( 'undefined' !== typeof windowOpen ) {
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery( this ).attr( 'href' ), 'wpcomfacebook', 'menubar=1,resizable=1,width=600,height=400' );
+				return false;
+			});
+var windowOpen;
+			jQuery( document.body ).on( 'click', 'a.share-google-plus-1', function() {
+				// If there's another sharing window open, close it.
+				if ( 'undefined' !== typeof windowOpen ) {
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery( this ).attr( 'href' ), 'wpcomgoogle-plus-1', 'menubar=1,resizable=1,width=480,height=550' );
+				return false;
+			});
+</script>
+<!--[if IE]>
+		<script type="text/javascript">
+		if ( 0 === window.location.hash.indexOf( '#comment-' ) ) {
+			// window.location.reload() doesn't respect the Hash in IE
+			window.location.hash = window.location.hash;
+		}
+		</script>
+		<![endif]-->
+<script type="text/javascript">
+			var comm_par_el = document.getElementById( 'comment_parent' ),
+			    comm_par = (comm_par_el && comm_par_el.value) ? comm_par_el.value : '',
+			    frame = document.getElementById( 'jetpack_remote_comment' ),
+			    tellFrameNewParent;
+
+			tellFrameNewParent = function() {
+				if ( comm_par ) {
+					frame.src = "https://jetpack.wordpress.com/jetpack-comment/?blogid=108212134&postid=429&comment_registration=0&require_name_email=1&stc_enabled=1&stb_enabled=1&show_avatars=1&avatar_default=mystery&greeting=Leave+a+Reply&greeting_reply=Leave+a+Reply+to+%25s&color_scheme=light&lang=en_US&jetpack_version=4.5.3&sig=249364abb4fd0d0fe050583e4d588ac39f8ffa58#parent=http%3A%2F%2Fwww.philosopher.co.kr%2F2016%2F06%2F01%2F429" + '&replytocom=' + parseInt( comm_par, 10 ).toString();
+				} else {
+					frame.src = "https://jetpack.wordpress.com/jetpack-comment/?blogid=108212134&postid=429&comment_registration=0&require_name_email=1&stc_enabled=1&stb_enabled=1&show_avatars=1&avatar_default=mystery&greeting=Leave+a+Reply&greeting_reply=Leave+a+Reply+to+%25s&color_scheme=light&lang=en_US&jetpack_version=4.5.3&sig=249364abb4fd0d0fe050583e4d588ac39f8ffa58#parent=http%3A%2F%2Fwww.philosopher.co.kr%2F2016%2F06%2F01%2F429";
+				}
+			};
+
+	
+			if ( 'undefined' !== typeof addComment ) {
+				addComment._Jetpack_moveForm = addComment.moveForm;
+
+				addComment.moveForm = function( commId, parentId, respondId, postId ) {
+					var returnValue = addComment._Jetpack_moveForm( commId, parentId, respondId, postId ), cancelClick, cancel;
+
+					if ( false === returnValue ) {
+						cancel = document.getElementById( 'cancel-comment-reply-link' );
+						cancelClick = cancel.onclick;
+						cancel.onclick = function() {
+							var cancelReturn = cancelClick.call( this );
+							if ( false !== cancelReturn ) {
+								return cancelReturn;
+							}
+
+							if ( !comm_par ) {
+								return cancelReturn;
+							}
+
+							comm_par = 0;
+
+							tellFrameNewParent();
+
+							return cancelReturn;
+						};
+					}
+
+					if ( comm_par == parentId ) {
+						return returnValue;
+					}
+
+					comm_par = parentId;
+
+					tellFrameNewParent();
+
+					return returnValue;
+				};
+			}
+
+	
+			if ( window.postMessage ) {
+				if ( document.addEventListener ) {
+					window.addEventListener( 'message', function( event ) {
+						if ( "https:\/\/jetpack.wordpress.com" !== event.origin ) {
+							return;
+						}
+
+						jQuery( frame ).height( event.data );
+					} );
+				} else if ( document.attachEvent ) {
+					window.attachEvent( 'message', function( event ) {
+						if ( "https:\/\/jetpack.wordpress.com" !== event.origin ) {
+							return;
+						}
+
+						jQuery( frame ).height( event.data );
+					} );
+				}
+			}
+		</script>
+<script async="" defer="" src="http://stats.wp.com/e-202643.js" type="text/javascript"></script>
+<script type="text/javascript">
+	_stq = window._stq || [];
+	_stq.push([ 'view', {v:'ext',j:'1:4.5.3',blog:'108212134',post:'429',tz:'0',srv:'www.philosopher.co.kr'} ]);
+	_stq.push([ 'clickTrackerInit', '108212134', '429' ]);
+</script>
+</body>
+</html>
